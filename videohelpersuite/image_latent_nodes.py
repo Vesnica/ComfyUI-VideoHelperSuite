@@ -419,7 +419,7 @@ class RepeatImages:
         return {
             "required": {
                 "images": ("IMAGE",),
-                "multiply_by": ("INT", {"default": 1, "min": 1, "max": BIGMAX, "step": 1})
+                "multiply_by": ("INT", {"default": 1, "min": 0, "max": BIGMAX, "step": 1})
             }
         }
     
@@ -430,6 +430,12 @@ class RepeatImages:
     FUNCTION = "duplicate_input"
 
     def duplicate_input(self, images: Tensor, multiply_by: int):
+        ## Patch for 0 multiply_by
+        if multiply_by == 0:
+            empty_shape = (0,) + images.shape[1:]
+            empty = torch.empty(empty_shape)
+            return (empty, empty.size(0),)
+        ## End Patch
         full_images = []
         for n in range(0, multiply_by):
             full_images.append(images)
